@@ -1,0 +1,17 @@
+
+name: build
+on:
+    push:
+        branches:
+            - master
+jobs:
+    build:
+        runs-on: ubuntu-latest
+        steps:
+            - run: |
+                echo '{"git:sha": "${{ github.sha }}"}' > version.json
+            - name: Upload build artifact
+              uses: actions/upload-artifact@v3
+              with:
+                name: version.json
+                path: version.json
