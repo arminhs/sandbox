@@ -17,3 +17,9 @@ jobs:
               with:
                 name: version.json
                 path: version.json
+    test:
+        runs-on: ubuntu-latest
+        environment: development
+        steps:
+            - run: |
+                echo 'Running tests...'
