@@ -8,6 +8,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - run: |
+            echo "::info::Running a job"
+      - run: |
             echo "::warning::Hello world! exit_status=0"
       - run: |
             echo "::error::Something failed exit_status=1"
