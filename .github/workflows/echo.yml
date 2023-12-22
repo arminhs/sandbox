@@ -1,0 +1,13 @@
+name: echo
+
+on: 
+    workflow_dispatch: 
+
+jobs:
+  echo:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+            echo "::warning::Hello world! exit_status=0"
+      - run: |
+            echo "::error::Something failed exit_status=1"
