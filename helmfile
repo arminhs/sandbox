@@ -1,0 +1,134 @@
+repositories:
+  - name: argo
+    url: https://argoproj.github.io/argo-helm
+
+releases:
+  - name: argocd
+    namespace: argocd
+    createNamespace: true
+    chart: argo/argo-cd
+    version: "5.51.6"
+    values:
+      - global:
+          image:
+            tag: "v2.9.3"
+        
+        configs:
+          params:
+            # Enable insecure mode for easier initial setup (disable in production)
+            server.insecure: true
+            # Enable application in any namespace
+            application.instanceLabelKey: argocd.argoproj.io/instance
+          
+          # Configure ArgoCD server
+          cm:
+            # Enable admin user
+            admin.enabled: true
+            # URL for ArgoCD server (update this to your domain)
+            url: "https://argocd.example.com"
+            # Enable local users
+            accounts.admin: apiKey, login
+            # Enable anonymous access to UI (disable in production)
+            users.anonymous.enabled: false
+            # Application settings
+            application.instanceLabelKey: argocd.argoproj.io/instance
+        
+        server:
+          # Enable ingress
+          ingress:
+            enabled: true
+            ingressClassName: "nginx"
+            annotations:
+              nginx.ingress.kubernetes.io/ssl-redirect: "true"
+              nginx.ingress.kubernetes.io/backend-protocol: "GRPC"
+              cert-manager.io/cluster-issuer: "letsencrypt-prod"
+            hosts:
+              - argocd.example.com
+            tls:
+              - secretName: argocd-server-tls
+                hosts:
+                  - argocd.example.com
+          
+          # Server configuration
+          extraArgs:
+            - --insecure
+          
+          # Resource limits
+          resources:
+            limits:
+              cpu: 500m
+              memory: 256Mi
+            requests:
+              cpu: 250m
+              memory: 128Mi
+        
+        controller:
+          # Controller resource limits
+          resources:
+            limits:
+              cpu: 500m
+              memory: 512Mi
+            requests:
+              cpu: 250m
+              memory: 256Mi
+        
+        dex:
+          # Disable Dex for simple setup (enable for SSO)
+          enabled: false
+        
+        redis:
+          # Redis configuration
+          enabled: true
+          resources:
+            limits:
+              cpu: 200m
+              memory: 128Mi
+            requests:
+              cpu: 100m
+              memory: 64Mi
+        
+        repoServer:
+          # Repository server configuration
+          resources:
+            limits:
+              cpu: 500m
+              memory: 512Mi
+            requests:
+              cpu: 250m
+              memory: 256Mi
+        
+        applicationSet:
+          # Enable ApplicationSet controller
+          enabled: true
+          resources:
+            limits:
+              cpu: 100m
+              memory: 128Mi
+            requests:
+              cpu: 50m
+              memory: 64Mi
+        
+        notifications:
+          # Enable notifications controller
+          enabled: true
+          resources:
+            limits:
+              cpu: 100m
+              memory: 128Mi
+            requests:
+              cpu: 50m
+              memory: 64Mi
+
+# Environment-specific values files
+environments:
+  default:
+    values:
+      - values/argocd-default.yaml
+  
+  production:
+    values:
+      - values/argocd-production.yaml
+      
+  staging:
+    values:
+      - values/argocd-staging.yaml
